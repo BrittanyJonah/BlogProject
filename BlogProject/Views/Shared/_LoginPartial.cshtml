@@ -1,0 +1,55 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<BlogUser> SignInManager
+@inject UserManager<BlogUser> UserManager
+<!-- Nav right START -->
+<div class="nav flex-nowrap align-items-center">
+
+    <!-- Nav Button -->
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <div class="nav-item d-none d-md-block">
+            <a asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage" class="mb-0 mx-2">Hello @UserManager.GetUserAsync(User).Result.FullName!</a>
+        </div>
+
+        <!-- Nav Search -->
+        <div class="nav-item dropdown dropdown-toggle-icon-none nav-search">
+            <a class="nav-link dropdown-toggle" role="button" href="#" id="navSearch" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-search fs-4"> </i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end shadow rounded p-2" aria-labelledby="navSearch">
+                <form asp-controller="Posts" asp-action="SearchIndex" class="input-group">
+                    <input name="SearchTerm" class="form-control border-success" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-success m-0" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Offcanvas menu toggler -->
+        <div class="nav-item">
+            <a class="nav-link p-0" data-bs-toggle="offcanvas" href="#offcanvasMenu" role="button" aria-controls="offcanvasMenu">
+                <i class="bi bi-text-right rtl-flip fs-2" data-bs-target="#offcanvasMenu"> </i>
+            </a>
+        </div>
+    }
+    else
+    {
+        <!-- Nav Search -->
+        <div class="nav-item dropdown dropdown-toggle-icon-none nav-search">
+            <a class="nav-link dropdown-toggle" role="button" href="#" id="navSearch" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-search fs-4"> </i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end shadow rounded p-2" aria-labelledby="navSearch">
+                <form asp-controller="Posts" asp-action="SearchIndex" class="input-group">
+                    <input name="SearchTerm" class="form-control border-success" type="search" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-success m-0" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="nav-item">
+            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-md btn-primary mb-0 mx-2">Login </a>
+        </div>
+    }
+
+</div>
+<!-- Nav right END -->

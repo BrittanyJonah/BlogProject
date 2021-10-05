@@ -1,0 +1,156 @@
+﻿@page
+@model LoginModel
+@inject SignInManager<BlogUser> _signInManager
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+<!-- =======================
+Inner intro START -->
+
+<section onbeforeunload="loggedIn()">
+    <div class="container">
+        <div class="row g-5">
+            <div class="col-md-4 col-xl-6">
+                <img src="~/images/register.png" style="width: 580px;" />
+            </div>
+            <div class="col-md-8 col-xl-6 mx-auto">
+                <div class="p-4 p-sm-5 bg-primary-soft rounded">
+                    <h1>Login</h1>
+                    <div class="col-12 mt-3">
+                        <span>Don't have an account? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl"><u> Register</u></a></span>
+                    </div>
+                    <!-- Form START -->
+                    <form id="account" method="post" class="row mt-3">
+                        <div asp-validation-summary="All" class="text-danger"></div>
+                        <!-- Email -->
+                        <div class="col-12 mb-3">
+                            <input asp-for="Input.Email" type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
+                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                        </div>
+                        <!-- Password -->
+                        <div class="col-12 mb-3">
+                            <input asp-for="Input.Password" type="password" class="form-control" id="exampleInputPassword1" placeholder="*********">
+                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                        </div>
+                        <!-- Checkbox -->
+                        <div class="col-6 ms-3 mb-3 form-check">
+                            <input asp-for="Input.RememberMe" type="checkbox" class="form-check-input pointerCursor" id="exampleCheck1">
+                            <label asp-for="Input.RememberMe" onclick="checkRememberMe()" class="form-check-label pointerCursor">Remember me</label>
+                        </div>
+                        <div class="col-5 text-sm-end">
+                            <a asp-page="./ForgotPassword"><u>Forgot password?</u></a>
+                        </div>
+
+                        <!-- Button -->
+                        <div class="col-12 d-grid">
+                            @{
+                                Uri unescapedUrl = new Uri(Request.Headers["Referer"]);
+
+                                //Check if empty referer or if referer is login page (failed login)
+                                if (!string.IsNullOrEmpty(Request.Headers["Referer"]) && unescapedUrl.AbsolutePath != "/Identity/Account/Login")
+                                {
+                                    <button type="submit" class="btn btn-primary" asp-route-returnUrl="@unescapedUrl.AbsolutePath">Login</button>
+                                }
+                                else
+                                {
+                                    <button type="submit" class="btn btn-primary" asp-route-returnUrl="@Model.ReturnUrl">Login</button>
+                                }
+                            }
+                        </div>
+                    </form>
+
+                    <hr class="mt-3 mb-3">
+                    <p class="text-center">or continue with</p>
+
+                    <!-- Form END -->
+                    <!-- Social-media btn -->
+                    <ul class="row list-unstyled d-sm-flex mt-3 justify-content-center">
+                        <li class="col-6 d-grid">
+                            <a href="#" class="btn bg-facebook"><i class="fab fa-facebook-f me-2"></i> Facebook</a>
+                        </li>
+                        <li class="col-6 d-grid">
+                            <a href="#" class="btn bg-google"><i class="fab fa-google me-2"></i> google</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+<!-- =======================
+Inner intro END -->
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function checkRememberMe() {
+            var rememberCheck = document.getElementById("exampleCheck1");
+
+            if (rememberCheck.checked) {
+                rememberCheck.checked = false;
+            }
+            else rememberCheck.checked = true;
+        }
+    </script>
+}
+
+
+@*<section>
+        <h4>Use another service to log in.</h4>
+        <hr />
+        @{
+            if ((Model.ExternalLogins?.Count ?? 0) == 0)
+            {
+                <div>
+                    <p>
+                        There are no external authentication services configured. See <a href="https://go.microsoft.com/fwlink/?LinkID=532715">this article</a>
+                        for details on setting up this ASP.NET application to support logging in via external services.
+                    </p>
+                </div>
+            }
+            else
+            {
+                <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                    <div>
+                        <p>
+                            @foreach (var provider in Model.ExternalLogins)
+                            {
+                                <button type="submit" class="btn btn-primary" name="provider" value="@provider.Name" title="Log in using your @provider.DisplayName account">@provider.DisplayName</button>
+                            }
+                        </p>
+                    </div>
+                </form>
+            }
+        }
+    </section>*@
+
+@*<script>
+    function loggedIn() {
+        const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+        })
+        Toast.fire({
+            icon: 'success',
+            title: 'Logged in successfully'
+        }).then(() => {
+            $('#account').submit();
+            return true;
+        })
+          
+        }
+    return false;
+</script>*@
+
+<script src="https://apis.google.com/js/platform.js" async defer></script>

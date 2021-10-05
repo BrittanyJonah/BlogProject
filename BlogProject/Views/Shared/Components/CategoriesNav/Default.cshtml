@@ -1,0 +1,42 @@
+﻿@model IEnumerable<PersonalBlog.Models.Blog>
+@inject PersonalBlog.Services.IImageService _imageService
+<!-- Nav item 4 Mega menu -->
+<li class="nav-item dropdown dropdown-fullwidth">
+    <a class="nav-link dropdown-toggle" asp-controller="Blogs" asp-action="Index" id="megaMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Categories</a>
+    <div class="dropdown-menu" aria-labelledby="megaMenu">
+        <div class="container">
+            <div class="row g-4 p-3 flex-fill">
+                @{int maxPosts = 4;}
+                @foreach (var blog in Model)
+                {
+                    if (maxPosts == 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        <!-- Card item START -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card bg-transparent">
+                                <a class="item-zoom" asp-controller="Blogs" asp-action="Details" asp-route-slug="@blog.Slug">
+                                    <!-- Card img -->
+                                    <img class="card-img rounded" src="@_imageService.DecodeImage(blog.ImageData, blog.ContentType)" style="object-fit: cover; height: 170px; width: 320px;" alt="post image">
+                                </a>
+                                
+                                <div class="card-body px-0 pt-3">
+                                    <h6 class="card-title mb-0"><a asp-controller="Blogs" asp-action="Details" asp-route-slug="@blog.Slug" class="btn-link text-reset fw-bold">@blog.Name</a></h6>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card item END -->
+                        maxPosts--;
+                    }
+                }
+            </div> <!-- Row END -->
+            <!-- View All Category button -->
+            <div class="text-center">
+                <a asp-area="" asp-controller="Blogs" asp-action="Index" class="fw-bold text-body text-primary-hover"><u>View all categories</u></a>
+            </div>
+        </div>
+    </div>
+</li>

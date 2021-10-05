@@ -1,0 +1,111 @@
+﻿@using PersonalBlog.Enums;
+@model PersonalBlog.Models.Post
+
+@{ ViewData["Title"] = "Edit"; }
+
+<div class="container">
+    <hr />
+    <h1 class="text-center mt-5">Edit Post</h1>
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-6">
+            <form asp-action="Edit" enctype="multipart/form-data">
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                @*Primary key passed to the post to know which post to edit*@
+                <input type="hidden" asp-for="Id" />
+
+                <!--Blog Name-->
+                <div class="form-group mb-3">
+                    <label asp-for="BlogId" class="control-label"></label>
+                    <select asp-for="BlogId" class="form-control" asp-items="ViewBag.BlogId"></select>
+                    <span asp-validation-for="BlogId" class="text-danger"></span>
+                </div>
+
+                <!--Post Title-->
+                <div class="form-group  mb-3">
+                    <label asp-for="Title" class="control-label"></label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+
+                <!--Abstract-->
+                <div class="form-group mb-3">
+                    <label asp-for="Abstract" class="control-label"></label>
+                    <textarea asp-for="Abstract" class="form-control"></textarea>
+                    <span asp-validation-for="Abstract" class="text-danger"></span>
+                </div>
+
+                <!--Content-->
+                <div class="form-group mb-3">
+                    <label asp-for="Content" class="control-label"></label>
+                    <textarea asp-for="Content" id="summernote" class="form-control"></textarea>
+                    <span asp-validation-for="Content" class="text-danger"></span>
+                </div>
+
+                <!--Ready Status-->
+                <div class="form-group mb-3">
+                    <label asp-for="PostLocation" class="control-label"></label>
+                    <select asp-for="PostLocation" class="form-control" asp-items="Html.GetEnumSelectList<PostLocation>()"></select>
+                    <span asp-validation-for="PostLocation" class="text-danger"></span>
+                </div>
+
+                <!--Tags-->
+                <div class="form-group mb-3">
+                    <div class="row">
+                        <div class="col">
+                            <label class="control-label">Manage Tags</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <!--LEFT COL-->
+                        <div class="col">
+                            <div class="row">
+                                <div class="col">
+                                    <input type="text" class="form-control" id="TagEntry" />
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col d-grid">
+                                    <button onclick="AddTag()" type="button" name="Add" class="btn btn-primary ">Add</button>
+                                </div>
+                                <div class="col d-grid">
+                                    <button onclick="RemoveTag()" type="button" name="Remove" class="btn btn-primary">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!--RIGHT COL-->
+                        <div class="col">
+                            <select class="form-select" name="TagValues" id="TagList" multiple></select>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Image-->
+                <div class="form-group mb-3">
+                    <label asp-for="Image" class="control-label"></label>
+                    <input type="file" name="NewImage" class="form-control" accept=".jpg, .png, .svg, .gif, .jpeg" />
+                    <span asp-validation-for="Image" class="text-danger"></span>
+                </div>
+
+                <!--Submit Button-->
+                <div class="form-group mb-5 d-flex justify-content-between">
+                    @Html.Hidden("postSlug", Model.Slug)
+                    @Html.Hidden("blogSlug", Model.Blog.Slug)
+                    <input type="submit" value="Save" class="btn btn-primary" />
+                    <a asp-action="Details" asp-route-blog="@Model.Blog.Slug" asp-route-slug="@Model.Slug" class="btn btn-primary">Back</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let tagValues = '@ViewData["TagValues"]';
+    </script>
+    
+    <script src="~/js/Custom.js"></script>
+
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

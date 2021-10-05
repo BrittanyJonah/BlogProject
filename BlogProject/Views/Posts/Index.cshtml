@@ -1,0 +1,72 @@
+﻿@using X.PagedList
+@using X.PagedList.Mvc.Core
+@using X.PagedList.Web.Common
+@using Microsoft.AspNetCore.Identity
+@model IPagedList<PersonalBlog.Models.Post>
+@inject SignInManager<BlogUser> SignInManager
+@inject PersonalBlog.Services.IImageService _imageService
+
+@{ ViewData["Title"] = "Index"; }
+
+<div class="container">
+    <!-- =======================
+    Inner intro START -->
+    <section class="pt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="bg-primary-soft text-center rounded-3 p-4">
+                    <h1 class="text-primary">Posts</h1>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!--Create Post btn if Admin only-->
+    @if (User.IsInRole("Admin"))
+    {
+        <a asp-action="Create" class="btn btn-success mb-5">Create</a>}
+    <!-- =======================
+    Inner intro END -->
+    <!-- =======================
+    Main content START -->
+    <section class="position-relative pt-0">
+        <div class="row">
+            @* For each list of posts *@
+            @foreach (var post in Model)
+            {<!-- Card item START -->
+                <div class="col-sm-6 col-lg-3">
+                    <div class="card mb-4">
+                        <!-- Card img -->
+                        <div class="card-fold position-relative">
+                            <img class="card-img" src="@_imageService.DecodeImage(post.ImageData, post.ContentType)" style="height: 250px; object-fit: cover;" alt="Post Image" />
+                        </div>
+                        <div class="card-body px-0 pt-3">
+                            <h4 class="card-title"><a asp-action="Details" asp-route-blog="@post.Blog.Slug" asp-route-slug="@post.Slug" class="btn-link text-reset stretched-link fw-bold">@post.Title</a></h4>
+                            <!-- Card info -->
+                            <ul class="nav nav-divider align-items-center text-uppercase small">
+                                <li class="nav-item">
+                                    <a asp-controller="Home" asp-action="About" class="nav-link text-reset btn-link">Brittany Jonah</a>
+                                </li>
+                                <li class="nav-item">@post.Created.ToString("MMM dd, yyyy")</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div> <!-- Card item END -->
+            }
+        </div> <!-- Row end -->
+        <!-- Pagination START -->
+        @if (Model.PageCount > 1)
+        {
+            <div class="col-12 d-flex justify-content-center mt-5">
+                @Html.PagedListPager(Model, page => Url.Action("Index", new { page = page }),
+                new PagedListRenderOptions
+                {
+                    LiElementClasses = new string[] { "page-item" },
+                    PageClasses = new string[] { "page-link" }
+                })
+            </div>
+        }
+        <!-- Pagination END -->
+    </section>
+    <!-- =======================
+    Main content END -->
+</div>

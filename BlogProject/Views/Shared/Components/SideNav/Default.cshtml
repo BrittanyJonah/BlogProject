@@ -1,0 +1,86 @@
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<BlogUser> SignInManager
+@inject UserManager<BlogUser> UserManager
+@inject PersonalBlog.Services.IImageService _imageService
+
+<!-- Offcanvas START -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasMenu">
+    <div class="offcanvas-header justify-content-end">
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+
+    <!--Profile Pic-->
+    <div class="mt-4 mb-4 d-flex justify-content-center" >
+        <a asp-area="Identity" asp-page="/Account/Manage/Index" class="profilepic" >
+            <div class="profilepic__content">
+                <span class="profilepic__icon"><i class="fas fa-camera" style="font-size: 20px;"></i></span>
+                <span class="profilepic__text">Edit Photo</span>
+            </div>
+            <label>
+                <img id=img_upload class="profilepic__image" src="@_imageService.DecodeImage(UserManager.GetUserAsync(User).Result.ImageData, UserManager.GetUserAsync(User).Result.ContentType)" style="object-fit: cover;" alt="Profile Pic" />
+            </label>
+        </a>
+    </div>
+
+    <div class="offcanvas-body d-flex flex-column pt-0">
+        <div>
+            <!--Name/Email-->
+            <div class="row text-center">
+                <h4 class="col-12">@UserManager.GetUserAsync(User).Result.FullName</h4>
+                <p class="col-12" asp-area="Identity" asp-page="/Account/Manage/Index">@User.Identity.Name</p>
+                <span>Member since Oct 2021</span>
+            </div>
+
+            <!--List-->
+            <div class="mt-5 mb-5 pb-5">
+                <ul class="list-unstyled list">
+                    <li>
+                        <span class="font-weight-bold">View Profile</span>
+                        <div> <span class="mr-1"></span> <i class="fa fa-angle-right"></i> </div>
+                    </li>
+                    <li>
+                        <span class="font-weight-bold">Likes</span>
+                        <div> <span class="mr-1"> </span> <i class="fa fa-angle-right"></i> </div>
+                    </li>
+                    <li>
+                        <span class="font-weight-bold">Comments</span>
+                        <div> <span class="mr-1"></span> <i class="fa fa-angle-right"></i> </div>
+                    </li>
+                    <li>Coming Soon</li>
+                </ul>
+            </div>
+        </div>
+
+        <form id="logoutForm" class="mt-5 pt-5 d-flex justify-content-center form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.RouteUrl(this.Url)" method="post">
+            <div class="nav-item">
+                <button onclick="return loggedOut()" type="submit" class="btn btn-primary btn-lg ps-5 pe-5 p-2">Logout</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- Offcanvas END -->
+
+<script>
+    function loggedOut() {
+        const Toast = Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        })
+
+        Toast.fire({
+            icon: 'success',
+            title: 'Logged out successfully'
+        }).then(() => {
+            $('#logoutForm').submit();
+            return true;
+        })
+        return false;
+    }
+</script>

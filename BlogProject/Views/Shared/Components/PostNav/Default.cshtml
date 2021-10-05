@@ -1,0 +1,75 @@
+﻿@model IEnumerable<PersonalBlog.Models.Post>
+@inject PersonalBlog.Services.IImageService _imageService
+
+<!-- Nav item 4 Mega menu -->
+<li class="nav-item dropdown dropdown-fullwidth">
+    <a class="nav-link dropdown-toggle" href="#" id="megaMenu" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> Posts</a>
+    <div class="dropdown-menu" aria-labelledby="megaMenu">
+        <div class="container">
+            <div class="row g-4 p-3 flex-fill">
+                @{int maxPosts = 4;}
+                @foreach (var post in Model)
+                {
+                    if (maxPosts == 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        <!-- Card item START -->
+                        <div class="col-sm-6 col-lg-3">
+                            <div class="card bg-transparent">
+                                <!-- Card img -->
+                                <a class="item-zoom" asp-controller="Posts" asp-action="Details" asp-route-blog="@post.Blog.Slug" asp-route-slug="@post.Slug">
+                                    <img class="card-img rounded" src="@_imageService.DecodeImage(post.ImageData, post.ContentType)" style="object-fit: cover; height: 170px; width: 320px;" alt="post image">
+                                </a>
+                                <div class="card-body px-0 pt-3">
+                                    <h6 class="card-title mb-0"><a asp-controller="Posts" asp-action="Details" asp-route-blog="@post.Blog.Slug" asp-route-slug="@post.Slug" class="btn-link text-reset fw-bold">@post.Title</a></h6>
+                                    <!-- Card info -->
+                                    <ul class="nav nav-divider align-items-center text-uppercase small mt-2">
+                                        <li class="nav-item">
+                                            <a asp-controller="Home" asp-action="About" class="text-reset btn-link">Brittany</a>
+                                        </li>
+                                        <li class="nav-item">@post.Created.ToString("MMM dd, yyyy")</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card item END -->
+                        maxPosts--;
+                    }
+                }
+
+
+                <!-- Trending tags -->
+                <div class="row px-3">
+                    <div class="col-12">
+                        <form name="searchIndex" asp-action="SearchIndex" asp-controller="Posts">
+                            <p class="list-inline-item me-3">Trending tags:</p>
+                            @{int maxTags = 10;}
+                            @foreach (var tag in ViewBag.Tags)
+                            {
+                                if (maxTags == 0)
+                                {
+                                    break;
+                                }
+                                else
+                                {
+
+                                    <button class="btn btn-sm btn-primary-soft me-2" type="submit" name="searchTerm" value="@tag.Text">@tag.Text</button>
+
+                                    maxTags--;
+                                }
+                            }
+                        </form>
+                    </div>
+                </div> <!-- Row END -->
+            </div> <!-- Row END -->
+
+            <!-- View All Posts button -->
+            <div class="text-center">
+                <a asp-area="" asp-controller="Posts" asp-action="Index" class="fw-bold text-body text-primary-hover"><u>View all posts</u></a>
+            </div>
+        </div>
+    </div>
+</li>

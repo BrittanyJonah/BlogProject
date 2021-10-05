@@ -1,0 +1,22 @@
+﻿@model IEnumerable<PersonalBlog.Models.Tag>
+
+<div class="col-sm-6 col-lg-3 mb-4">
+    <h5 class="mb-4">Browse by Tag</h5>
+    <form name="searchIndex" asp-action="SearchIndex" asp-controller="Posts">
+        @{int maxTags = 10;}
+        @foreach (var tag in Model)
+        {
+            if (maxTags == 0)
+            {
+                break;
+            }
+            else
+            {
+                <button class="btn btn-sm btn-primary-soft" type="submit" name="searchTerm" value="@tag.Text">@tag.Text</button>
+
+                maxTags--;
+            }
+        }
+    </form>
+</div>
+

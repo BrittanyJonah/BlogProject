@@ -1,0 +1,470 @@
+﻿@model PersonalBlog.Models.Post
+@using Microsoft.AspNetCore.Identity
+@using PersonalBlog.Enums
+@inject PersonalBlog.Services.IImageService _imageService
+@inject SignInManager<BlogUser> SignInManager
+@inject Microsoft.AspNetCore.Identity.UserManager<BlogUser> _userManager
+
+@{ ViewData["Title"] = @Html.DisplayFor(model => model.Title); }
+
+<!-- Divider -->
+<div class="container">
+    <div class="border-bottom border-primary border-1 opacity-1"></div>
+</div>
+
+<!-- =======================
+Inner intro START -->
+<section class="pb-3 pb-lg-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <a asp-controller="Blogs" asp-action="Details" asp-route-slug="@Model.Blog.Slug" class="badge bg-primary mb-2"><i class="fas fa-circle me-2 small fw-bold"></i>@Html.DisplayFor(model => model.Blog.Name)</a>
+                <h1>@Html.DisplayFor(model => model.Title)</h1>
+            </div>
+            <p class="lead">@Html.DisplayFor(model => model.Abstract)</p>
+        </div>
+    </div>
+</section>
+<!-- =======================
+Inner intro END -->
+<!-- =======================
+Main START -->
+<section class="pt-0">
+    <div class="container position-relative" data-sticky-container>
+
+        <div class="row">
+            <!-- Left sidebar START -->
+            <div class="col-lg-2">
+                <div class="text-start text-lg-center mb-5" data-sticky data-margin-top="80" data-sticky-for="991">
+                    <!-- Author info -->
+                    <div class="position-relative">
+                        <div class="avatar avatar-xxl">
+                            <img class="avatar-img rounded-circle" src="@_imageService.DecodeImage(Model.BlogUser.ImageData, Model.BlogUser.ContentType)" style="object-fit: cover;" alt="Brittanys Picture">
+                        </div>
+                        <a asp-controller="Home" asp-action="About" class="h4 stretched-link mt-2 mb-0 d-block">Brittany Jonah</a>
+                        <p class="mt-2">a Software Developer in Atlantic Canada who specializes in building beautiful UX/UI designs that deliver exceptional digital experiences.</p>
+                    </div>
+                    <hr class="d-none d-lg-block">
+                    <!-- Card info -->
+                    <ul class="list-inline list-unstyled">
+                        <li class="list-inline-item d-lg-block my-lg-2">@Model.Created.ToString("MMM dd, yyyy")</li>
+                        <li class="list-inline-item d-lg-block my-lg-2"><a href="#" class="text-body"><i class="far fa-heart me-1"></i></a> 266</li>
+                        <li class="list-inline-item d-lg-block my-lg-2"><i class="far fa-eye me-1"></i>@Model.PageViews Views</li>
+                    </ul>
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <!--Post Delete/Edit Buttons-->
+                        <div class="mb-4">
+                            <form id="deleteForm" asp-action="DeleteConfirmed">
+                                <a class="btn btn-primary btn-xs ms-1 me-1" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+                                <input type="hidden" asp-for="Id" />
+                                <input type="submit" value="Delete" class="btn btn-danger  btn-xs" onclick="return confirmDelete()" />
+                            </form>
+                        </div>
+                    }
+                    <!-- Tags -->
+                    <form name="searchIndex" asp-action="SearchIndex" asp-controller="Posts" class="me-3">
+                        @{int maxTags = 10;}
+                        @foreach (var tag in Model.Tags)
+                        {
+                            if (maxTags == 0)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                <button class="btn btn-sm btn-primary-soft" type="submit" name="searchTerm" value="@tag.Text">#@tag.Text</button>
+
+                                maxTags--;
+                            }
+                        }
+                    </form>
+                </div>
+            </div>
+            <!-- Left sidebar END -->
+            <!-- Main Content START -->
+            <div class="col-lg-7 mb-5">
+                <!-- Image -->
+                <figure class="figure">
+                    <a href="@_imageService.DecodeImage(Model.ImageData, Model.ContentType)" data-gallery="image-popup">
+                        <img class="rounded" src="@_imageService.DecodeImage(Model.ImageData, Model.ContentType)" style="width: 800px; Height: 500px; object-fit: cover;" alt="Image">
+                    </a>
+                </figure>
+
+                @{Model.Content = Model.Content.ToString().Replace("<p>", ""); }
+                @{var contentLength = Model.Content[1..];}
+                <p><span class="dropcap">@Html.Raw(Model.Content[0])</span> @Html.Raw(contentLength)</p>
+
+
+                @*Next/Prev Posts*@
+            <div class="row g-0 mt-5">
+                @if (ViewBag.prevPost is null && ViewBag.nextPost is null) 
+                { 
+                    
+                }
+                else if (ViewBag.prevPost is null)
+                {
+                    <div class="col-sm-12 bg-primary-soft p-4 position-relative text-sm-end rounded-end">
+                        <span>Next post<i class="bi bi-arrow-right ms-3 rtl-flip"></i></span>
+                        <h5 class="m-0"><a asp-action="Details" asp-route-slug="@ViewBag.nextPost.Slug" class="stretched-link btn-link text-reset">@ViewBag.nextPost.Title</a></h5>
+                    </div>
+                }
+                else if (ViewBag.nextPost is null)
+                {
+                    <div class="col-sm-12 bg-primary-soft p-4 position-relative border-end border-1 rounded-start">
+                        <span><i class="bi bi-arrow-left me-3 rtl-flip"></i>Previous post</span>
+                        <h5 class="m-0"><a asp-action="Details" asp-route-slug="@ViewBag.prevPost.Slug" class="stretched-link btn-link text-reset">@ViewBag.prevPost.Title</a></h5>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-sm-6 bg-primary-soft p-4 position-relative border-end border-1 rounded-start">
+                        <span><i class="bi bi-arrow-left me-3 rtl-flip"></i>Previous post</span>
+                        <h5 class="m-0"><a asp-action="Details" asp-route-slug="@ViewBag.prevPost.Slug" class="stretched-link btn-link text-reset">@ViewBag.prevPost.Title</a></h5>
+                    </div>
+                    <div class="col-sm-6 bg-primary-soft p-4 position-relative text-sm-end rounded-end">
+                        <span>Next post<i class="bi bi-arrow-right ms-3 rtl-flip"></i></span>
+                        <h5 class="m-0"><a asp-action="Details" asp-route-slug="@ViewBag.nextPost.Slug" class="stretched-link btn-link text-reset">@ViewBag.nextPost.Title</a></h5>
+                    </div>
+                }
+            </div>
+
+                <!-- Related post START -->
+                <div class="mt-5">
+                    <h2 class="my-3"><i class="bi bi-symmetry-vertical me-2"></i>Related posts</h2>
+                    <div class="tiny-slider arrow-hover arrow-blur arrow-white arrow-round">
+                        <div class="tiny-slider-inner"
+                             data-autoplay="true"
+                             data-hoverpause="true"
+                             data-gutter="24"
+                             data-arrow="true"
+                             data-dots="false"
+                             data-items-xl="2"
+                             data-items-xs="1">
+
+                            @foreach (var post in Model.Blog.Posts)
+                            {
+                                if (post.Slug != Model.Slug)
+                                {
+                                    <!-- Card item START -->
+                                    <div class="card">
+                    
+                                        <!-- Card img -->
+                                        <div class="position-relative">
+                                            <img class="card-img" src="@_imageService.DecodeImage(post.ImageData, post.ContentType)" style="object-fit: cover;" alt="Card image">
+                                            <div class="card-img-overlay d-flex align-items-start flex-column p-3">
+                                                <!-- Card overlay Top -->
+                                                <div class="w-100 mb-auto d-flex justify-content-end">
+                                                    <div class="text-end ms-auto">
+                                                        <!-- Card format icon -->
+                                                        <!--<div class="icon-md bg-white-soft bg-blur text-white fw-bold rounded-circle" title="8.5 rating">8.5</div>-->
+                                                    </div>
+                                                </div>
+                                                <!-- Card overlay bottom -->
+                                                @*<div class="w-100 mt-auto">
+                                                        <a href="#" class="badge bg-info mb-2"><i class="fas fa-circle me-2 small fw-bold"></i>@post.Blog.Name</a>
+                                                    </div>*@
+                                            </div>
+                                        </div>
+                                        <div class="card-body px-0 pt-3">
+                                            <h5 class="card-title"><a asp-action="Details" asp-route-blog="@post.Blog.Slug" asp-route-slug="@post.Slug"  class="btn-link text-reset stretched-link fw-bold">@post.Title</a></h5>
+                                            <!-- Card info -->
+                                            <ul class="nav nav-divider align-items-center d-none d-sm-inline-block">
+                                                <li class="nav-item">
+                                                    <div class="nav-link">
+                                                        <div class="d-flex align-items-center position-relative">
+                                                            <div class="avatar avatar-xs">
+                                                                <img class="avatar-img rounded-circle" src="@_imageService.DecodeImage(post.BlogUser.ImageData, post.BlogUser.ContentType)" style="object-fit: cover;" alt="avatar">
+                                                            </div>
+                                                            <span class="ms-3">by <a href="#" class="stretched-link text-reset btn-link">Brittany</a></span>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                <li class="nav-item">@post.Created.ToString("MMM dd, yyyy")</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <!-- Card item END -->
+                                }
+
+                            }
+
+                        </div>
+                    </div> <!-- Slider END -->
+                </div>
+                <!-- Related post END -->
+                <!-- Divider -->
+                <hr>
+
+                <div id="commentSection">
+                    @{int commentNum = Model.Comments.Count;}
+                    @if (commentNum == 1)
+                    {
+                        <h3>1 comment</h3>
+                    }
+                    else
+                    {
+                        <h3>@commentNum comments</h3>
+                    }
+                    @foreach (var comment in Model.Comments)
+                    {
+                        <!-- Comment level 1-->
+                        <div class="my-4 d-flex">
+                            <img class="avatar avatar-md rounded-circle float-start me-3" src="@_imageService.DecodeImage(comment.BlogUser.ImageData, comment.BlogUser.ContentType)" style="object-fit: cover;" alt="User Profile Pic">
+                            <div>
+                                <div class="mb-2">
+                                    <!--USERNAME-->
+                                    <h5 class="m-0">@comment.BlogUser.FullName</h5>
+
+                                    <!--POST INFO-->
+                                    @if (!string.IsNullOrEmpty(comment.ModeratedBody))
+                                    {
+                                        <span class="me-3 small">
+                                            Moderated <span style="color: red">(@comment.ModerationType.ToString().ToLower())</span>
+                                            : @comment.Moderated?.ToString("MMM dd, yyyy") at @comment.Created.ToString("h:mm tt").ToLower()
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="me-3 small">@comment.Created.ToString("MMM dd, yyyy") at @comment.Created.ToString("h:mm tt").ToLower()</span>
+                                    }
+                                    <!--EDIT BUTTON-->
+                                    @if (comment.Moderated is null && comment.Deleted is null && comment.BlogUserId == _userManager.GetUserId(User))
+                                    {
+                                        <a href="" data-bs-toggle="modal" data-bs-target="#editModal_@comment.Id" class="me-3 fw-normal">Edit</a>
+                                    }
+                                    <a href="#" class="text-body fw-normal">Reply</a>
+                                </div>
+
+                                <!--MODERATE/DELETE BUTTON-->
+                                @if (User.IsInRole("Moderator") || User.IsInRole("Admin") && comment.Deleted is null)
+                                {
+
+                                    <form asp-action="Delete" asp-controller="Comments">
+                                        <a href="" data-bs-toggle="modal" data-bs-target="#moderateModal_@comment.Id" class="btn btn-primary btn-xs fw-normal me-1">Moderate</a>
+                                        @Html.Hidden("Id", comment.Id)
+                                        @Html.Hidden("PostSlug", Model.Slug)
+                                        @Html.Hidden("BlogSlug", Model.Blog)
+                                        <button type="submit" class="btn btn-danger btn-xs fw-normal">Delete</button>
+                                    </form>
+
+                                }
+
+                                <!--DISPLAY COMMENT SECTION-->
+                                @if (string.IsNullOrEmpty(comment.ModeratedBody))
+                                {
+                                    <p>@comment.Body</p>
+                                }
+                                else if (comment.Moderated is not null)
+                                {
+                                    <p>@comment.ModeratedBody</p>
+                                }
+                                else if (comment.Deleted is null)
+                                {
+
+                                }
+
+                            </div>
+                        </div>
+
+                        <!--MODALS-->
+                        <!-- Edit Modal -->
+                        <div class="modal fade" id="editModal_@comment.Id" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Editing Comment...</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form asp-action="Edit" asp-controller="Comments">
+                                            @Html.Hidden("Id", comment.Id)
+                                            @Html.Hidden("PostSlug", Model.Slug)
+                                            @Html.Hidden("BlogSlug", Model.Blog)
+                                            <div class="form-group">
+                                                <textarea name="Body" class="form-control" required>@comment.Body</textarea>
+                                            </div>
+
+                                            <button class="btn btn-primary mt-3" type="submit">Save</button>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Moderate Modal -->
+                        <div class="modal fade" id="moderateModal_@comment.Id" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Moderating Comment...</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form asp-action="Moderate" asp-controller="Comments">
+                                            @Html.Hidden("Id", comment.Id)
+                                            @Html.Hidden("Body", comment.Body)
+                                            @Html.Hidden("PostSlug", Model.Slug)
+                                            @Html.Hidden("BlogSlug", Model.Blog)
+                                            <div class="form-group">
+                                                <label class="control-label">Original Comment</label>
+                                                <textarea disabled class="form-control" style="resize: none">@comment.Body</textarea>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="control-label">Moderated Comment</label>
+                                                <textarea asp-for="@comment.ModeratedBody" class="form-control" name="ModeratedBody" style="resize: none" required>@comment.ModeratedBody</textarea>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="control-label">Reason For Moderation</label>
+                                                <select asp-for="@comment.ModerationType" name="ModerationType" class="form-control" asp-items="@Html.GetEnumSelectList<ModerationType>()"></select>
+                                            </div>
+
+                                            <button class="btn btn-primary mt-3" type="submit">Save</button>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    }
+                </div>
+                <!-- Comments END -->
+
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <!-- Reply START -->
+                    <div>
+                        <h3>Leave a reply</h3>
+                        <form method="post" asp-action="Create" asp-controller="Comments" class="row g-3 mt-2">
+                            @Html.Hidden("PostId", Model.Id)
+                            @Html.Hidden("PostSlug", Model.Slug)
+                            @Html.Hidden("BlogSlug", Model.Blog)
+                            <div class="col-12">
+                                <label class="form-label">Your Comment *</label>
+                                <textarea name="body" class="form-control" rows="5"></textarea>
+                            </div>
+                            <div class="col-12 d-grid">
+                                <button type="submit" class="btn btn-primary">Post comment</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- Reply END -->
+                }
+                else
+                {
+                    <a class="btn btn-primary d-flex justify-content-center" asp-area="Identity" asp-page="/Account/Login">Sign in to comment</a>
+                }
+
+            </div> <!-- Main Content END -->
+            <!-- Right sidebar START -->
+            <div class="col-lg-3">
+                <div data-sticky data-margin-top="80" data-sticky-for="991">
+                    <h4>Share this article</h4>
+                    <ul class="nav text-white-force">
+                        <!--Facebook-->
+                        <li class="nav-item me-1">
+                            <div id="fb-root"></div>
+                            <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v12.0" nonce="RK4kZekA"></script>
+
+                            <div class="fb-share-button" data-href="https://www.bitsofbritt.com/" data-layout="button" data-size="large">
+                                <a target="_blank" href="https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fdevelopers.facebook.com%2Fdocs%2Fplugins%2F&amp;src=sdkpreparse" class="fb-xfbml-parse-ignore">
+                                    Share
+                                </a>
+                            </div>
+
+                        </li>
+                        <!--Twitter-->
+                        <li class="nav-item">
+                            <script>
+                                    window.twttr = (function (d, s, id) {
+                                    var js, fjs = d.getElementsByTagName(s)[0],
+                                        t = window.twttr || {};
+                                    if (d.getElementById(id)) return t;
+                                    js = d.createElement(s);
+                                    js.id = id;
+                                    js.src = "https://platform.twitter.com/widgets.js";
+                                    fjs.parentNode.insertBefore(js, fjs);
+
+                                    t._e = [];
+                                    t.ready = function (f) {
+                                        t._e.push(f);
+                                    };
+
+                                    return t;
+                                }(document, "script", "twitter-wjs"));</script>
+
+                            <a class="twitter-share-button"
+                               href="https://twitter.com/intent/tweet?text=Check%20out%20this%20blog!"
+                               data-size="large">
+                                Tweet
+                            </a>
+
+                        </li>
+
+                    </ul>
+                    <!-- Advertisement -->
+                    <!--<div class="mt-4">
+                        <a href="#" class="d-block card-img-flash">
+                            <img src="/images/adv.png" alt="">
+                        </a>
+                    </div>-->
+                </div>
+            </div>
+            <!-- Right sidebar END -->
+        </div>
+    </div>
+</section>
+
+<!-- =======================
+Main END -->
+<!-- =======================
+    Sticky post START -->
+<div class="sticky-post bg-light border p-4 mb-5 text-sm-end rounded d-none d-xxl-block">
+    <div class="d-flex align-items-center">
+        <!-- Title -->
+        <div class="me-3">
+            <span>Next post<i class="bi bi-arrow-right ms-3 rtl-flip"></i></span>
+            <h6 class="m-0"> <a href="javascript:void(0)" class="stretched-link btn-link text-reset">Bad habits that people in the industry need to quit</a></h6>
+        </div>
+        <!-- image -->
+        <div class="col-4 d-none d-md-block">
+            <img src="/images/blog/4by3/05.jpg" alt="Image">
+        </div>
+    </div>
+</div>
+<!-- =======================
+Sticky post END -->
+<script>
+    function confirmDelete() {
+
+        Swal.fire({
+            title: 'Delete "@Model.Title"?',
+            text: "This will permanently delete the post.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire(
+                    'Success!',
+                    '"@Model.Title" has been deleted.',
+                    'success',
+                ).then(() => {
+                    $('#deleteForm').submit();
+                    return true;
+                })
+            }
+        })
+        return false;
+    }
+</script>

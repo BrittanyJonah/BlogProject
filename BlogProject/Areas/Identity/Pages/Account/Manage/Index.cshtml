@@ -1,0 +1,57 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Profile";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<h4>@ViewData["Title"]</h4>
+<partial name="_StatusMessage" model="Model.StatusMessage" />
+
+<div class="row">
+    <form id="profile-form" method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="row">
+            <div class="col-12 col-lg-6 form-group mt-3">
+                <label asp-for="Username"></label>
+                <input asp-for="Username" class="form-control" disabled />
+            </div>
+
+            <!--Profile Pic-->
+            <div class="col-12 col-lg-6 mt-4 mb-4 d-flex justify-content-center">
+                <div class="profilepic">
+                    <div class="profilepic__content">
+                        <span class="profilepic__icon"><i class="fas fa-camera" style="font-size: 20px;"></i></span>
+                        <span class="profilepic__text">Edit Photo</span>
+                    </div>
+                    <label>
+                        <input onchange=file_changed() asp-for="Input.Image" type="file" id="my_file" style="display: none; object-fit: cover;" accept=".jpg,.jpeg,.png,.svg,.gif" />
+                        <img id=img_upload2 class="profilepic__image" src="@Model.CurrentImage" alt="Profile Pic" />
+                    </label>
+                    <span asp-validation-for="Input.Image" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-2">
+                <button id="update-profile-button" type="submit" class="btn btn-primary mt-3">Save</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        function file_changed() {
+            var selectedFile = document.getElementById('my_file').files[0];
+            var img = document.getElementById('img_upload2')
+
+            var reader = new FileReader();
+            reader.onload = function () {
+                img.src = this.result
+            }
+            reader.readAsDataURL(selectedFile);
+        }
+    </script>
+}
